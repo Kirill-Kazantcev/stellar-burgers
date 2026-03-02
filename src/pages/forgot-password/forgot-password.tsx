@@ -1,32 +1,37 @@
-import { FC, useState, SyntheticEvent } from 'react';
+import { FC, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { forgotPasswordApi } from '@api';
 import { ForgotPasswordUI } from '@ui-pages';
+import { useDispatch, useSelector } from '../../services/store';
+import {
+  forgotPassword,
+  forgotPasswordErrorSelector
+} from '../../services/slices';
+import { useForm } from '../../hooks';
 
 export const ForgotPassword: FC = () => {
-  const [email, setEmail] = useState('');
-  const [error, setError] = useState<Error | null>(null);
-
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const errorText = useSelector(forgotPasswordErrorSelector);
+  const { values, handleChange } = useForm({
+    email: ''
+  });
 
-  const handleSubmit = (e: SyntheticEvent) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    setError(null);
-    forgotPasswordApi({ email })
-      .then(() => {
+    dispatch(forgotPassword(values.email)).then((result) => {
+      if (forgotPassword.fulfilled.match(result)) {
         localStorage.setItem('resetPassword', 'true');
         navigate('/reset-password', { replace: true });
-      })
-      .catch((err) => setError(err));
+      }
+    });
   };
 
   return (
     <ForgotPasswordUI
-      errorText={error?.message}
-      email={email}
-      setEmail={setEmail}
+      errorText={errorText || undefined}
+      email={values.email}
+      handleChange={handleChange}
       handleSubmit={handleSubmit}
     />
   );

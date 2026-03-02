@@ -1,7 +1,8 @@
 import { setCookie, getCookie } from './cookie';
 import { TIngredient, TOrder, TOrdersData, TUser } from './types';
 
-const URL = process.env.BURGER_API_URL;
+const URL =
+  process.env.BURGER_API_URL || 'https://norma.education-services.ru/api';
 
 const checkResponse = <T>(res: Response): Promise<T> =>
   res.ok ? res.json() : res.json().then((err) => Promise.reject(err));
@@ -37,7 +38,7 @@ export const refreshToken = (): Promise<TRefreshResponse> =>
 
 export const fetchWithRefresh = async <T>(
   url: RequestInfo,
-  options: RequestInit
+  options: RequestInit = {}
 ) => {
   try {
     const res = await fetch(url, options);
@@ -65,10 +66,6 @@ type TFeedsResponse = TServerResponse<{
   orders: TOrder[];
   total: number;
   totalToday: number;
-}>;
-
-type TOrdersResponse = TServerResponse<{
-  data: TOrder[];
 }>;
 
 export const getIngredientsApi = () =>
@@ -99,26 +96,8 @@ export const getOrdersApi = () =>
     return Promise.reject(data);
   });
 
-type TOwner = {
-  name: string;
-  email: string;
-  createdAt: string;
-  updatedAt: string;
-};
-
-type TNewOrder = {
-  _id: string;
-  status: string;
-  name: string;
-  owner: TOwner;
-  createdAt: string;
-  updatedAt: string;
-  number: number;
-  price: number;
-};
-
 type TNewOrderResponse = TServerResponse<{
-  order: TNewOrder;
+  order: TOrder;
   name: string;
 }>;
 
