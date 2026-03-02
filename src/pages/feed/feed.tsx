@@ -1,13 +1,15 @@
 import { Preloader } from '@ui';
 import { FeedUI } from '@ui-pages';
-import { FC, useEffect, useRef } from 'react';
+import { FC, useEffect, useRef, useCallback } from 'react';
 import { useDispatch, useSelector } from '../../services/store';
-import { wsConnectionStart, wsConnectionClose } from '../../services/slices';
+import {
+  wsConnectionStart,
+  wsConnectionClose
+} from '../../services/slices/feedSocketSlice';
 
 export const Feed: FC = () => {
   const dispatch = useDispatch();
   const isConnectedRef = useRef(false);
-  const isMountedRef = useRef(true);
 
   const orders = useSelector((state) => state.feedSocket?.orders || []);
   const isConnected = useSelector(
@@ -16,15 +18,12 @@ export const Feed: FC = () => {
   const error = useSelector((state) => state.feedSocket?.error || null);
 
   useEffect(() => {
-    isMountedRef.current = true;
-
     if (!isConnectedRef.current) {
       dispatch(wsConnectionStart());
       isConnectedRef.current = true;
     }
 
     return () => {
-      isMountedRef.current = false;
       if (isConnectedRef.current) {
         dispatch(wsConnectionClose());
         isConnectedRef.current = false;
@@ -32,11 +31,12 @@ export const Feed: FC = () => {
     };
   }, [dispatch]);
 
-  const handleGetFeeds = () => {
-    if (!isMountedRef.current) return;
+  const handleGetFeeds = useCallback(() => {
     dispatch(wsConnectionClose());
-    dispatch(wsConnectionStart());
-  };
+    setTimeout(() => {
+      dispatch(wsConnectionStart());
+    }, 100);
+  }, [dispatch]);
 
   if (error && !orders.length) {
     return (

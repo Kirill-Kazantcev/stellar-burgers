@@ -5,7 +5,7 @@ import {
   useSelector as selectorHook
 } from 'react-redux';
 import { rootReducer } from './rootReducer';
-import { socketMiddleware } from './middleware/socket-middleware';
+import { socketMiddleware } from './middleware/sockeMiddleware';
 import { WS_FEED_URL } from '../utils/constants';
 import {
   wsConnectionStart,

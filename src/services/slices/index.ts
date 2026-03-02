@@ -63,7 +63,6 @@ export {
   userSlice
 } from './userSlice';
 
-// Импортируем из feedSocketSlice
 import feedSocketReducer, {
   wsConnectionStart,
   wsConnectionClose,
@@ -73,7 +72,6 @@ import feedSocketReducer, {
   wsGetMessage
 } from './feedSocketSlice';
 
-// Реэкспортируем
 export {
   feedSocketReducer,
   wsConnectionStart,
