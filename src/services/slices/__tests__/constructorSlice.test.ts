@@ -88,16 +88,20 @@ describe('constructorSlice', () => {
     expect(constructorSlice.reducer(undefined, { type: 'unknown' })).toEqual(initialState);
   });
 
-  describe('addIngredient - добавление ингредиентов', () => {
-    test('должен добавлять булку в пустой конструктор', () => {
+  describe('addIngredient - добавление булок', () => {
+    test('должен добавлять булку в пустой конструктор (булка становится и верхом и низом)', () => {
       const action = addIngredient(mockBun);
       const newState = constructorSlice.reducer(initialState, action);
 
+      // Проверяем, что булка добавилась
       expect(newState.bun).toEqual(mockBun);
       expect(newState.ingredients).toHaveLength(0);
+      
+      // Проверяем, что это именно булка
+      expect(newState.bun?.type).toBe('bun');
     });
 
-    test('должен заменять существующую булку при добавлении новой', () => {
+    test('должен заменять существующую булку при добавлении новой (старая удаляется)', () => {
       const stateWithBun = {
         bun: mockBun,
         ingredients: []
@@ -112,10 +116,38 @@ describe('constructorSlice', () => {
       const action = addIngredient(newBun);
       const newState = constructorSlice.reducer(stateWithBun, action);
 
+      // Проверяем, что старая булка заменена на новую
+      expect(newState.bun).not.toEqual(mockBun);
       expect(newState.bun).toEqual(newBun);
+      expect(newState.bun?._id).toBe('bun-2');
+      expect(newState.bun?.name).toBe('Новая булка');
       expect(newState.ingredients).toHaveLength(0);
     });
 
+    test('должен сохранять начинки при замене булки', () => {
+      const stateWithBunAndIngredients = {
+        bun: mockBun,
+        ingredients: [mockIngredient1, mockIngredient2]
+      };
+
+      const newBun: TIngredient = {
+        ...mockBun,
+        _id: 'bun-2',
+        name: 'Новая булка'
+      };
+
+      const action = addIngredient(newBun);
+      const newState = constructorSlice.reducer(stateWithBunAndIngredients, action);
+
+      // Проверяем, что булка заменилась, а начинки остались
+      expect(newState.bun).toEqual(newBun);
+      expect(newState.ingredients).toHaveLength(2);
+      expect(newState.ingredients[0].id).toBe('ingredient-1');
+      expect(newState.ingredients[1].id).toBe('ingredient-2');
+    });
+  });
+
+  describe('addIngredient - добавление начинок и соусов', () => {
     test('должен добавлять начинку с уникальным id', () => {
       const action = addIngredient(mockMain);
       const newState = constructorSlice.reducer(initialState, action);
