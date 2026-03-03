@@ -49,6 +49,20 @@ describe('constructorSlice', () => {
     image_mobile: 'image-mobile.jpg'
   };
 
+  const mockSauce: TIngredient = {
+    _id: 'sauce-1',
+    name: 'Соус',
+    type: 'sauce',
+    proteins: 5,
+    fat: 5,
+    carbohydrates: 5,
+    calories: 50,
+    price: 50,
+    image: 'image.jpg',
+    image_large: 'image-large.jpg',
+    image_mobile: 'image-mobile.jpg'
+  };
+
   // Ингредиенты с готовыми id для тестов
   const mockIngredient1: TConstructorIngredient = {
     ...mockMain,
@@ -68,6 +82,98 @@ describe('constructorSlice', () => {
     name: 'Начинка 3',
     id: 'ingredient-3'
   };
+
+  // Тест начального состояния
+  test('должен возвращать начальное состояние', () => {
+    expect(constructorSlice.reducer(undefined, { type: 'unknown' })).toEqual(initialState);
+  });
+
+  describe('addIngredient - добавление ингредиентов', () => {
+    test('должен добавлять булку в пустой конструктор', () => {
+      const action = addIngredient(mockBun);
+      const newState = constructorSlice.reducer(initialState, action);
+
+      expect(newState.bun).toEqual(mockBun);
+      expect(newState.ingredients).toHaveLength(0);
+    });
+
+    test('должен заменять существующую булку при добавлении новой', () => {
+      const stateWithBun = {
+        bun: mockBun,
+        ingredients: []
+      };
+
+      const newBun: TIngredient = {
+        ...mockBun,
+        _id: 'bun-2',
+        name: 'Новая булка'
+      };
+
+      const action = addIngredient(newBun);
+      const newState = constructorSlice.reducer(stateWithBun, action);
+
+      expect(newState.bun).toEqual(newBun);
+      expect(newState.ingredients).toHaveLength(0);
+    });
+
+    test('должен добавлять начинку с уникальным id', () => {
+      const action = addIngredient(mockMain);
+      const newState = constructorSlice.reducer(initialState, action);
+
+      expect(newState.bun).toBeNull();
+      expect(newState.ingredients).toHaveLength(1);
+      expect(newState.ingredients[0]._id).toBe(mockMain._id);
+      expect(newState.ingredients[0].name).toBe(mockMain.name);
+      expect(newState.ingredients[0].id).toBe('test-uuid-123');
+    });
+
+    test('должен добавлять соус с уникальным id', () => {
+      const action = addIngredient(mockSauce);
+      const newState = constructorSlice.reducer(initialState, action);
+
+      expect(newState.bun).toBeNull();
+      expect(newState.ingredients).toHaveLength(1);
+      expect(newState.ingredients[0]._id).toBe(mockSauce._id);
+      expect(newState.ingredients[0].name).toBe(mockSauce.name);
+      expect(newState.ingredients[0].id).toBe('test-uuid-123');
+    });
+
+    test('должен добавлять несколько начинок подряд', () => {
+      // Добавляем первую начинку
+      const action1 = addIngredient(mockMain);
+      const stateAfterFirst = constructorSlice.reducer(initialState, action1);
+      
+      // Добавляем вторую начинку
+      const secondMain: TIngredient = {
+        ...mockMain,
+        _id: 'main-2',
+        name: 'Начинка 2'
+      };
+      const action2 = addIngredient(secondMain);
+      const stateAfterSecond = constructorSlice.reducer(stateAfterFirst, action2);
+
+      expect(stateAfterSecond.bun).toBeNull();
+      expect(stateAfterSecond.ingredients).toHaveLength(2);
+      expect(stateAfterSecond.ingredients[0]._id).toBe(mockMain._id);
+      expect(stateAfterSecond.ingredients[0].id).toBe('test-uuid-123');
+      expect(stateAfterSecond.ingredients[1]._id).toBe('main-2');
+      expect(stateAfterSecond.ingredients[1].id).toBe('test-uuid-123');
+    });
+
+    test('должен добавлять булку и начинки вместе', () => {
+      // Добавляем булку
+      const bunAction = addIngredient(mockBun);
+      const stateWithBun = constructorSlice.reducer(initialState, bunAction);
+      
+      // Добавляем начинку
+      const ingredientAction = addIngredient(mockMain);
+      const finalState = constructorSlice.reducer(stateWithBun, ingredientAction);
+
+      expect(finalState.bun).toEqual(mockBun);
+      expect(finalState.ingredients).toHaveLength(1);
+      expect(finalState.ingredients[0]._id).toBe(mockMain._id);
+    });
+  });
 
   describe('удаление ингредиентов', () => {
     test('должен удалять ингредиент из конструктора по id', () => {
