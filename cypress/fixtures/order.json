@@ -1,0 +1,12 @@
+{
+  "success": true,
+  "order": {
+    "_id": "order123",
+    "number": 12345,
+    "name": "Космический бургер",
+    "status": "done",
+    "createdAt": "2024-01-01T12:00:00.000Z",
+    "updatedAt": "2024-01-01T12:00:00.000Z",
+    "ingredients": ["643d69a5c3f7b9001cfa093c", "643d69a5c3f7b9001cfa093e"]
+  }
+}
